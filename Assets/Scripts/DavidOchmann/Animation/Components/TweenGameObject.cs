@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace DavidOchmann.Animation
 {
-	public enum TweenMethod{ To, From };
+	public enum TweenMethod{ To, From }; 
 	public enum EaseType{ Back, Bounce, Circ, Cubic, Elastic, Expo, Linear, Quad, Quart, Quint, Sine };
 	public enum EaseMethod{ EaseIn, EaseOut, EaseInOut };
 

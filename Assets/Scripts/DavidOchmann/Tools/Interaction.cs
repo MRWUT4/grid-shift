@@ -83,7 +83,7 @@ namespace DavidOchmann
 		{
 			isDown = true;
 			isOver = true;
-			
+
 			InvokeMouseDown();
 			events.mouseDown.Invoke( gameObject );
 		}
