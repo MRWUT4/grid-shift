@@ -32,6 +32,19 @@ namespace DavidOchmann.Grid
 			initPosition();
 		}
 
+		public GameObject GetCloneAtPosition(int x, int y)
+		{
+			GameObject clone = Object.Instantiate( template );
+
+			float posX = (float)x * distance.x;
+			float posY = -(float)y * distance.y;
+
+			clone.transform.SetParent( gameObject.transform );
+			clone.transform.localPosition = new Vector3( posX, posY, 0 );
+
+			return clone;
+		}
+
 
 		/**
 		 * Private interface.
@@ -46,14 +59,7 @@ namespace DavidOchmann.Grid
 
 		private void populateList(int x, int y, object value)
 		{
-			GameObject clone = Object.Instantiate( template );
-
-			float posX = (float)x * distance.x;
-			float posY = -(float)y * distance.y;
-
-			clone.transform.SetParent( gameObject.transform );
-			clone.transform.localPosition = new Vector3( posX, posY, 0 );
-
+			GameObject clone = GetCloneAtPosition( x, y );
 			objectGrid.Set( x, y, clone );
 
 			events.setup.Invoke( x, y, clone );

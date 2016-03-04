@@ -5,24 +5,24 @@ using UnityEngine;
 
 namespace DavidOchmann.Collections
 {
-	public enum Direction{ Horizontal, Vertical }; 
+	public enum Orientation{ Horizontal, Vertical }; 
 
 	public class DragList
 	{
 		public GameObject target;
 		public List<object> list;
-		public Direction direction;
+		public Orientation orientation;
 
 		private Vector2 disposition;
 		private InputMessenger inputMessenger;
 		public Dictionary<GameObject, Vector3> positions;
 
 
-		public DragList(GameObject target, List<object> list, Direction direction)
+		public DragList(GameObject target, List<object> list, Orientation orientation)
 		{
 			this.target = target;
 			this.list = list;
-			this.direction = direction;
+			this.orientation = orientation;
 
 			init();
 		}
@@ -93,7 +93,7 @@ namespace DavidOchmann.Collections
 			Vector2 pressPosition = eventData.pressPosition;
 			Vector2 position = eventData.position;
 
-			if( direction == Direction.Horizontal )
+			if( orientation == Orientation.Horizontal )
 				disposition.x = position.x - pressPosition.x;
 			else
 				disposition.y = position.y - pressPosition.y;

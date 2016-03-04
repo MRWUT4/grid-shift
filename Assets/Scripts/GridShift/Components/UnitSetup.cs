@@ -46,12 +46,17 @@ namespace GridShift
 
 
 		/** Setup functions. */
-		private void setupItemValue(GameObject item)
+		private void setupItemValue(GameObject item, int value = -1 )
 		{
 			Unit unit = item.GetComponent<Unit>();
 
-			unit.value = index + 1;
-			index++;
+			if( value == -1 )
+			{
+				unit.value = index + 1;
+				index++;
+			}
+			else
+				unit.value = value;
 		}
 
 
@@ -71,7 +76,7 @@ namespace GridShift
 		private void itemOnDropHandler(GameObject target, PointerEventData eventData)
 		{
 			dragList.kill();
-			dragList = null;
+			// dragList = null;
 		}
 
 
@@ -82,14 +87,52 @@ namespace GridShift
 			{
 				Vector2 delta = eventData.delta;
 
-				Direction direction = Mathf.Abs( delta.x ) > Mathf.Abs( delta.y ) ? Direction.Horizontal : Direction.Vertical;
+				Orientation orientation = Mathf.Abs( delta.x ) > Mathf.Abs( delta.y ) ? Orientation.Horizontal : Orientation.Vertical;
 				Point point = objectGrid.GetPosition( target );
 				
-				Debug.Log( point );
+				List<object> list = getOrientationList( point, orientation, delta );
 
-				List<object> list = direction == Direction.Horizontal ? objectGrid.GetRow( point.y ) : objectGrid.GetColumn( point.x );
+				dragList = new DragList( target, list, orientation );
+			}
+		}
 
-				dragList = new DragList( target, list, direction );
+		private List<object> getOrientationList(Point point, Orientation orientation, Vector2 delta)
+		{
+			List<object> list = orientation == Orientation.Horizontal ? objectGrid.GetRow( point.y ) : objectGrid.GetColumn( point.x );
+
+			if( orientation == Orientation.Horizontal && delta.x > 0 )
+				extendListWithCloneAt( list, -1, point.y, list.Count - 1 );
+			else
+			if( orientation == Orientation.Horizontal )
+				extendListWithCloneAt( list, list.Count, point.y, 0 );
+			else
+			if( orientation == Orientation.Vertical && delta.y < 0 )
+				extendListWithCloneAt( list, point.x, -1, list.Count - 1 );
+			else
+			if( orientation == Orientation.Vertical )
+				extendListWithCloneAt( list, point.x, list.Count, 0 );
+
+			return list;
+		}
+
+		private void extendListWithCloneAt(List<object> list, int x, int y, int position)
+		{
+			GameObject item = gridDisplay.GetCloneAtPosition( x, y );
+			GameObject opposition = (GameObject)list[ position ];
+			Unit unit = opposition.GetComponent<Unit>();
+
+			setupItemValue( item, unit.value );
+
+			int insert = position == 0 ? list.Count : 0;
+			list.Insert( insert, item );
+
+
+			for( int i = 0; i < list.Count; ++i )
+			{
+			    GameObject a = (GameObject)list[ i ];
+			    
+			    Debug.Log( a.GetComponent<Unit>().value );
+
 			}
 		}
 	}
