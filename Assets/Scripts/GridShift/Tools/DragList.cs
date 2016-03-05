@@ -12,17 +12,20 @@ namespace DavidOchmann.Collections
 		public GameObject target;
 		public List<object> list;
 		public Orientation orientation;
+		public Dictionary<GameObject, Vector3> positions;
+		public Vector2 distance;
 
 		private Vector2 disposition;
+		private float wrapIndex;
 		private InputMessenger inputMessenger;
-		public Dictionary<GameObject, Vector3> positions;
 
 
-		public DragList(GameObject target, List<object> list, Orientation orientation)
+		public DragList(GameObject target, List<object> list, Orientation orientation, Vector2 distance)
 		{
 			this.target = target;
 			this.list = list;
 			this.orientation = orientation;
+			this.distance = distance;
 
 			init();
 		}
@@ -35,6 +38,7 @@ namespace DavidOchmann.Collections
 		private void reset()
 		{
 			disposition = new Vector2();
+			wrapIndex = 0;
 		}
 
 		public void kill()
@@ -86,6 +90,7 @@ namespace DavidOchmann.Collections
 			calulateDisposition( eventData );
 			setupPositionDictionary();
 			moveListItemsOverDelta( disposition );
+			wrapListItems( disposition );
 		}
 
 		private void calulateDisposition(PointerEventData eventData)
@@ -113,17 +118,38 @@ namespace DavidOchmann.Collections
 			}
 		}
 
-		private void moveListItemsOverDelta(Vector2 delta)
+		private void moveListItemsOverDelta(Vector2 disposition)
 		{
 			for( int i = 0; i < list.Count; ++i )
 			{
 			    GameObject item = (GameObject)list[ i ];
 			    Vector3 localPosition = positions[ item ];
 
-			    localPosition.x += delta.x;
-			    localPosition.y += delta.y;
+			    localPosition.x += disposition.x;
+			    localPosition.y += disposition.y;
 
 			    item.transform.localPosition = localPosition;
+			}
+		}
+
+		private void wrapListItems(Vector2 disposition)
+		{
+			float value = ( disposition.x / distance.x ) + wrapIndex;
+
+			// Debug.Log( value );
+
+			if( value >  1 )
+			{
+				Debug.Log( value );
+				wrapIndex--;
+				Debug.Log( "toLeft " + wrapIndex );
+			}
+			else
+			if( value < -1 )
+			{
+				wrapIndex++;
+				Debug.Log( "toRight");
+				
 			}
 		}
 

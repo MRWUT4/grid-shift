@@ -92,7 +92,7 @@ namespace GridShift
 				
 				List<object> list = getOrientationList( point, orientation, delta );
 
-				dragList = new DragList( target, list, orientation );
+				dragList = new DragList( target, list, orientation, gridDisplay.distance );
 			}
 		}
 
@@ -125,15 +125,6 @@ namespace GridShift
 
 			int insert = position == 0 ? list.Count : 0;
 			list.Insert( insert, item );
-
-
-			for( int i = 0; i < list.Count; ++i )
-			{
-			    GameObject a = (GameObject)list[ i ];
-			    
-			    Debug.Log( a.GetComponent<Unit>().value );
-
-			}
 		}
 	}
 }

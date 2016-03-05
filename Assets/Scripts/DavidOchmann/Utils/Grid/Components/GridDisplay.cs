@@ -23,6 +23,21 @@ namespace DavidOchmann.Grid
 
 
 		/**
+		 * Getter / Setter.
+		 */
+		
+		public float width
+		{
+			get { return size.x * distance.x; }
+		}
+
+		public float height
+		{
+			get { return size.y * distance.y; }
+		}
+
+
+		/**
 		 * Public interface.
 		 */
 
