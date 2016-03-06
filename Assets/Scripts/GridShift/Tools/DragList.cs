@@ -1,11 +1,23 @@
 using DavidOchmann.Events;
 using System.Collections.Generic;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine;
+using GridShift;
 
 namespace DavidOchmann.Collections
 {
 	public enum Orientation{ Horizontal, Vertical }; 
+
+	
+	public class DragListUnityEvent : UnityEvent<DragList>{}
+
+	public class DragListEvents
+	{
+		public DragListUnityEvent wrapBeginning = new DragListUnityEvent();
+		public DragListUnityEvent wrapEnd = new DragListUnityEvent();
+	}
+
 
 	public class DragList
 	{
@@ -14,6 +26,7 @@ namespace DavidOchmann.Collections
 		public Orientation orientation;
 		public Dictionary<GameObject, Vector3> positions;
 		public Vector2 distance;
+		public DragListEvents events = new DragListEvents();
 
 		private Vector2 disposition;
 		private float wrapIndex;
@@ -35,15 +48,24 @@ namespace DavidOchmann.Collections
 		 * Public interface.
 		 */
 
-		private void reset()
+		public void Reset()
 		{
 			disposition = new Vector2();
 			wrapIndex = 0;
 		}
 
-		public void kill()
+		public void Kill()
 		{
 			initInputMessenger( false );
+		}
+
+		public void Update()
+		{
+			if( positions != null )
+			{
+				updateListItemsDelta( disposition );
+				updateListWrapHandling( disposition );
+			}
 		}
 
 
@@ -53,7 +75,7 @@ namespace DavidOchmann.Collections
 
 		private void init()
 		{
-			reset();
+			Reset();
 
 			initVariables();
 			initInputMessenger();
@@ -74,12 +96,12 @@ namespace DavidOchmann.Collections
 			if( boolean )
 			{
 				inputMessenger.events.OnDrag.AddListener( targetOnDragHandler );
-				inputMessenger.events.OnDrop.AddListener( targetOnDropHandler );
+				// inputMessenger.events.OnDrop.AddListener( targetOnDropHandler );
 			}
 			else
 			{
 				inputMessenger.events.OnDrag.RemoveListener( targetOnDragHandler );
-				inputMessenger.events.OnDrop.RemoveListener( targetOnDropHandler );
+				// inputMessenger.events.OnDrop.RemoveListener( targetOnDropHandler );
 			}
 		}
 
@@ -89,8 +111,9 @@ namespace DavidOchmann.Collections
 		{
 			calulateDisposition( eventData );
 			setupPositionDictionary();
-			moveListItemsOverDelta( disposition );
-			wrapListItems( disposition );
+
+			// updateListItemsDelta( disposition );
+			// updateListWrapHandling( disposition );
 		}
 
 		private void calulateDisposition(PointerEventData eventData)
@@ -118,7 +141,7 @@ namespace DavidOchmann.Collections
 			}
 		}
 
-		private void moveListItemsOverDelta(Vector2 disposition)
+		private void updateListItemsDelta(Vector2 disposition)
 		{
 			for( int i = 0; i < list.Count; ++i )
 			{
@@ -132,31 +155,76 @@ namespace DavidOchmann.Collections
 			}
 		}
 
-		private void wrapListItems(Vector2 disposition)
+
+		/** Wrap items in list. */
+		private void updateListWrapHandling(Vector2 disposition)
 		{
-			float value = ( disposition.x / distance.x ) + wrapIndex;
-
-			// Debug.Log( value );
-
-			if( value >  1 )
+			if( orientation == Orientation.Horizontal )
 			{
-				Debug.Log( value );
+				changeWrapIndexValue( disposition.x, distance.x, list.Count - 1, 0 );
+			}	
+			else
+			if( orientation == Orientation.Vertical )
+			{
+				changeWrapIndexValue( disposition.y, distance.y, 0, list.Count - 1 );
+			}
+		}	
+
+		private void changeWrapIndexValue(float value, float distance, int aIndex, int bIndex)
+		{
+			float direction = ( value / distance ) + wrapIndex;				
+
+			if( direction >  1 )
+			{
+				changeWrapPositionValues( orientation, direction, aIndex, bIndex );
 				wrapIndex--;
-				Debug.Log( "toLeft " + wrapIndex );
+
+				events.wrapBeginning.Invoke( this );
 			}
 			else
-			if( value < -1 )
+			if( direction < -1 )
 			{
+				changeWrapPositionValues( orientation, direction, bIndex, aIndex );
 				wrapIndex++;
-				Debug.Log( "toRight");
-				
+
+				events.wrapEnd.Invoke( this );
 			}
+		}
+
+		private void changeWrapPositionValues(Orientation orientation, float direction, int removeIndex, int insertIndex)
+		{
+			float add = direction > 0 ? 1 : -1;
+
+			GameObject lastItem = (GameObject)list[ removeIndex ];
+			Vector3 lastVector = positions[ lastItem ];
+
+			GameObject firstItem = (GameObject)list[ insertIndex ];
+			Vector3 firstVector = positions[ firstItem ];
+
+			if( orientation == Orientation.Horizontal )
+				lastVector.x = firstVector.x - distance.x * add;
+			else
+				lastVector.y = firstVector.y - distance.y * add;
+
+			positions[ lastItem ] = lastVector;
+
+			moveListItem( removeIndex, insertIndex );
+		}
+
+		private GameObject moveListItem(int removeIndex, int insertIndex)
+		{
+			GameObject removeItem = (GameObject)list[ removeIndex ];
+
+			list.RemoveAt( removeIndex );
+			list.Insert( insertIndex, removeItem );
+
+			return removeItem;
 		}
 
 		/** OnDrop functions. */
-		private void targetOnDropHandler(GameObject target, PointerEventData eventData)
-		{
-			reset();
-		}
+		// private void targetOnDropHandler(GameObject target, PointerEventData eventData)
+		// {
+		// 	// Reset();
+		// }
 	}
 }

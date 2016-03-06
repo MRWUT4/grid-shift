@@ -32,6 +32,11 @@ namespace GridShift
 			setupItemInputMessenger( item );
 		}
 
+		public void Update()
+		{
+			updateDragList();
+		}
+
 
 		/**
 		 * Private interface.
@@ -75,7 +80,8 @@ namespace GridShift
 
 		private void itemOnDropHandler(GameObject target, PointerEventData eventData)
 		{
-			dragList.kill();
+			// dragList.Kill();
+			// dragList.Reset();
 			// dragList = null;
 		}
 
@@ -92,39 +98,93 @@ namespace GridShift
 				
 				List<object> list = getOrientationList( point, orientation, delta );
 
+
 				dragList = new DragList( target, list, orientation, gridDisplay.distance );
+				dragList.events.wrapBeginning.AddListener( dragListWrapBeginningHandler );
+				dragList.events.wrapEnd.AddListener( dragListWrapEndHandler );
 			}
 		}
+
+		private void dragListWrapBeginningHandler(DragList dragList)
+		{
+			if( dragList.orientation == Orientation.Horizontal )
+				copyUnityValues( dragList.list, dragList.list.Count - 2, 0 );
+			else
+				copyUnityValues( dragList.list, 1, dragList.list.Count - 1 );
+		}
+
+		private void dragListWrapEndHandler(DragList dragList)
+		{
+			if( dragList.orientation == Orientation.Horizontal )
+				copyUnityValues( dragList.list, 1, dragList.list.Count - 1 );
+			else
+				copyUnityValues( dragList.list, dragList.list.Count - 2, 0 );
+		}
+
+		private void copyUnityValues(List<object> list, int aIndex, int bIndex)
+		{
+			// List<object> list = dragList.list;
+
+			Unit copyElement = ( (GameObject)list[ aIndex] ).GetComponent<Unit>();
+			Unit pasteElement = ( (GameObject)list[ bIndex ] ).GetComponent<Unit>();
+
+			pasteElement.value = copyElement.value;	
+		}
+
+		private void logDragListValues(DragList dragList)
+		{
+			List<object> list = dragList.list;
+
+			for( int i = 0; i < list.Count; ++i )
+			{
+			    GameObject item = (GameObject)list[ i ];
+			    
+			    Debug.Log( item.GetComponent<Unit>().value );
+			}
+		}
+
 
 		private List<object> getOrientationList(Point point, Orientation orientation, Vector2 delta)
 		{
 			List<object> list = orientation == Orientation.Horizontal ? objectGrid.GetRow( point.y ) : objectGrid.GetColumn( point.x );
 
-			if( orientation == Orientation.Horizontal && delta.x > 0 )
-				extendListWithCloneAt( list, -1, point.y, list.Count - 1 );
-			else
 			if( orientation == Orientation.Horizontal )
-				extendListWithCloneAt( list, list.Count, point.y, 0 );
-			else
-			if( orientation == Orientation.Vertical && delta.y < 0 )
-				extendListWithCloneAt( list, point.x, -1, list.Count - 1 );
+			{
+				extendListWithCloneAt( list, -1, point.y, list.Count - 1, list.Count - 1 );
+				extendListWithCloneAt( list, list.Count - 1, point.y, 0, 1 );
+			}	
 			else
 			if( orientation == Orientation.Vertical )
-				extendListWithCloneAt( list, point.x, list.Count, 0 );
+			{
+				extendListWithCloneAt( list, point.x, -1, list.Count - 1, list.Count - 1 );
+				extendListWithCloneAt( list, point.x, list.Count - 1, 0, 1 );
+			}
 
 			return list;
 		}
 
-		private void extendListWithCloneAt(List<object> list, int x, int y, int position)
+		private void extendListWithCloneAt(List<object> list, int x, int y, int position, int value)
 		{
 			GameObject item = gridDisplay.GetCloneAtPosition( x, y );
-			GameObject opposition = (GameObject)list[ position ];
+			setupItemInputMessenger( item );
+
+
+			GameObject opposition = (GameObject)list[ value ];
 			Unit unit = opposition.GetComponent<Unit>();
 
 			setupItemValue( item, unit.value );
 
+
 			int insert = position == 0 ? list.Count : 0;
 			list.Insert( insert, item );
+		}
+
+
+		/** Update funcitons. */
+		private void updateDragList()
+		{
+			if( dragList != null )
+				dragList.Update();	
 		}
 	}
 }
