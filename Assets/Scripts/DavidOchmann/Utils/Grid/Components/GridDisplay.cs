@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using System.Collections.Generic;
 
 namespace DavidOchmann.Grid
 {
@@ -19,6 +20,7 @@ namespace DavidOchmann.Grid
 		public GameObject template;
 		public GridDisplayEvents events;
 
+		public ObjectGrid positionGrid;
 		public ObjectGrid objectGrid;
 
 
@@ -43,8 +45,9 @@ namespace DavidOchmann.Grid
 
 		public void Start()
 		{
-			initGrid();
+			initObjectGrid();
 			initPosition();
+			initPositionGrid();
 		}
 
 		public GameObject GetCloneAtPosition(int x, int y)
@@ -60,13 +63,48 @@ namespace DavidOchmann.Grid
 			return clone;
 		}
 
+		private Vector2 GetClosestPoint(Vector3 aVector3)
+		{
+			float closestDistance = float.NaN;
+			Vector2 point = new Vector2();
+
+			positionGrid.ForEveryElementCall( delegate(int x, int y, object item )
+			{
+				Vector3 bVector3 = (Vector3)item;
+				float distance = Vector3.Distance( aVector3, bVector3 );
+
+				if( float.IsNaN( closestDistance ) || distance < closestDistance )
+				{
+					closestDistance = distance;
+
+					point.x = x;
+					point.y = y;
+				}
+			} );
+
+			return point;
+		}
+
+		public void MapListToObjectGrid(List<object> list)
+		{
+			for( int i = 0; i < list.Count; ++i )
+			{
+			    GameObject item = (GameObject)list[ i ];
+			    Vector2 closetPoint = GetClosestPoint( item.transform.position );
+
+			    GameObject closestItem = (GameObject)objectGrid.Get( (int)closetPoint.x, (int)closetPoint.y );
+
+			    Object.Destroy( closestItem );
+			}
+		}
+
 
 		/**
 		 * Private interface.
 		 */
 
 		/** Init ObjectGrid. */
-		private void initGrid()
+		private void initObjectGrid()
 		{
 			objectGrid = new ObjectGrid( (int)size.x, (int)size.y );
 			objectGrid.ForEveryElementCall( populateList );
@@ -88,6 +126,14 @@ namespace DavidOchmann.Grid
 			float y = distance.y * ( size.y - 1 ) * .5f;
 
 			transform.localPosition = new Vector3( x, y, 0 );
+		}
+
+
+		/** Init PositionGrid. */
+		private void initPositionGrid()
+		{
+			positionGrid = new ObjectGrid( (int)size.x, (int)size.y );
+			positionGrid.Set( x, y, clone.transform.position );
 		}
 	}
 }

@@ -26,9 +26,9 @@ namespace DavidOchmann.Collections
 		public Orientation orientation;
 		public Dictionary<GameObject, Vector3> positions;
 		public Vector2 distance;
+		public Vector2 disposition;
 		public DragListEvents events = new DragListEvents();
 
-		private Vector2 disposition;
 		private float wrapIndex;
 		private InputMessenger inputMessenger;
 

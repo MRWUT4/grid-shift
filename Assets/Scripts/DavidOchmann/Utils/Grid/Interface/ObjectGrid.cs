@@ -65,6 +65,11 @@ namespace DavidOchmann.Grid
 			row[ x ] = value; 
 		}
 
+		public object Get(int x, int y)
+		{
+			return ( (List<object>)column[ y ] )[ x ];
+		}
+
 		public Point GetPosition(object value)
 		{
 			Point point = null;;

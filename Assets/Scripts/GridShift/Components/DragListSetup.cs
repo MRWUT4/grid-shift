@@ -1,18 +1,20 @@
 using DavidOchmann.Collections;
 using DavidOchmann.Events;
 using DavidOchmann.Grid;
+using DavidOchmann.Animation;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine;
 
 namespace GridShift
 {
-	public class UnitSetup : MonoBehaviour 
+	public class DragListSetup : MonoBehaviour 
 	{
 		private int index = 0;
 		private GridDisplay gridDisplay;
 		private ObjectGrid objectGrid;
 		private DragList dragList;
+		private DTween dTween;
 
 
 		/**
@@ -26,6 +28,8 @@ namespace GridShift
 
 		public void Setup(int x, int y, object value)
 		{
+			Debug.Log( "Setup " + x + " " + y);
+
 			GameObject item = (GameObject)value;
 			
 			setupItemValue( item );
@@ -34,6 +38,7 @@ namespace GridShift
 
 		public void Update()
 		{
+			dTween.Update();
 			updateDragList();
 		}
 
@@ -45,6 +50,7 @@ namespace GridShift
 		/** Init variables. */
 		private void initVariables()
 		{
+			dTween = new DTween();
 			gridDisplay = GetComponent<GridDisplay>();
 			objectGrid = gridDisplay.objectGrid;
 		}
@@ -80,10 +86,40 @@ namespace GridShift
 
 		private void itemOnDropHandler(GameObject target, PointerEventData eventData)
 		{
-			// dragList.Kill();
+			// TODO: Coninue with next state.
+
+			dragList.Kill();
+			animateDragListPositionToRoundValue();
+
 			// dragList.Reset();
 			// dragList = null;
 		}
+
+
+		/** Aniamtion functions. */
+		private void animateDragListPositionToRoundValue()
+		{
+			Vector2 vector2 = dragList.disposition;
+
+			vector2.x = Mathf.Round( vector2.x / dragList.distance.x ) * dragList.distance.x;
+			vector2.y = Mathf.Round( vector2.y / dragList.distance.y ) * dragList.distance.y;
+
+			Tween dragListTween = dTween.Add( TweenFactory.DragListDisposition( dragList, vector2 ) );
+			dragListTween.OnComplete += tweenOnCompleteHandler;
+		}
+
+		private void tweenOnCompleteHandler(Tween tween)
+		{
+			gridDisplay.MapListToObjectGrid( dragList.list );
+			// mapDragListGameObjectsToGrid();
+		}
+
+
+		/** Map list GameObjects to Grid .*/
+		// private void mapDragListGameObjectsToGrid()
+		// {
+			
+		// }
 
 
 		/** Setup DragList. */
@@ -131,17 +167,17 @@ namespace GridShift
 			pasteElement.value = copyElement.value;	
 		}
 
-		private void logDragListValues(DragList dragList)
-		{
-			List<object> list = dragList.list;
+		// private void logDragListValues(DragList dragList)
+		// {
+		// 	List<object> list = dragList.list;
 
-			for( int i = 0; i < list.Count; ++i )
-			{
-			    GameObject item = (GameObject)list[ i ];
+		// 	for( int i = 0; i < list.Count; ++i )
+		// 	{
+		// 	    GameObject item = (GameObject)list[ i ];
 			    
-			    Debug.Log( item.GetComponent<Unit>().value );
-			}
-		}
+		// 	    Debug.Log( item.GetComponent<Unit>().value );
+		// 	}
+		// }
 
 
 		private List<object> getOrientationList(Point point, Orientation orientation, Vector2 delta)
