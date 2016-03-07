@@ -13,9 +13,10 @@ namespace DavidOchmann.Events
 		public InputMessengerUnityEvent OnPointerDown;
 		public InputMessengerUnityEvent OnDrag;
 		public InputMessengerUnityEvent OnDrop;
+		public InputMessengerUnityEvent OnEndDrag;
 	}
 
-	public class InputMessenger : MonoBehaviour, IPointerDownHandler, IDragHandler, IDropHandler
+	public class InputMessenger : MonoBehaviour, IPointerDownHandler, IDragHandler, IDropHandler, IEndDragHandler
 	{
 		public InputMessengerEvents events;
 
@@ -37,6 +38,11 @@ namespace DavidOchmann.Events
 		public void OnDrop(PointerEventData eventData)
 		{
 			events.OnDrop.Invoke( gameObject, eventData );
+		}
+
+		public void OnEndDrag(PointerEventData eventData)
+		{
+			events.OnEndDrag.Invoke( gameObject, eventData );
 		}
 	}
 }

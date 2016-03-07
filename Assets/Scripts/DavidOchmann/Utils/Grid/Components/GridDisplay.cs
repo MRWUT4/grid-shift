@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DavidOchmann.Grid
 {
@@ -11,6 +12,14 @@ namespace DavidOchmann.Grid
 	public class GridDisplayEvents
 	{
 		public GridDisplayUnityEvent setup;
+	}
+
+	public class ItemVO
+	{
+		public int x;
+		public int y;
+		public float distance;
+		public GameObject item;
 	}
 
 	public class GridDisplay : MonoBehaviour
@@ -28,15 +37,15 @@ namespace DavidOchmann.Grid
 		 * Getter / Setter.
 		 */
 		
-		public float width
-		{
-			get { return size.x * distance.x; }
-		}
+		// public float width
+		// {
+		// 	get { return size.x * distance.x; }
+		// }
 
-		public float height
-		{
-			get { return size.y * distance.y; }
-		}
+		// public float height
+		// {
+		// 	get { return size.y * distance.y; }
+		// }
 
 
 		/**
@@ -45,17 +54,16 @@ namespace DavidOchmann.Grid
 
 		public void Start()
 		{
-			initObjectGrid();
+			initGrids();
 			initPosition();
-			initPositionGrid();
 		}
 
 		public GameObject GetCloneAtPosition(int x, int y)
 		{
 			GameObject clone = Object.Instantiate( template );
 
-			float posX = (float)x * distance.x;
-			float posY = -(float)y * distance.y;
+			float posX = Mathf.Floor( (float)x * distance.x );
+			float posY = Mathf.Floor( -(float)y * distance.y );
 
 			clone.transform.SetParent( gameObject.transform );
 			clone.transform.localPosition = new Vector3( posX, posY, 0 );
@@ -63,10 +71,10 @@ namespace DavidOchmann.Grid
 			return clone;
 		}
 
-		private Vector2 GetClosestPoint(Vector3 aVector3)
+		private ItemVO GetDistanceItemVO(Vector3 aVector3)
 		{
 			float closestDistance = float.NaN;
-			Vector2 point = new Vector2();
+			ItemVO itemVO = new ItemVO();
 
 			positionGrid.ForEveryElementCall( delegate(int x, int y, object item )
 			{
@@ -77,25 +85,55 @@ namespace DavidOchmann.Grid
 				{
 					closestDistance = distance;
 
-					point.x = x;
-					point.y = y;
+					itemVO.x = x;
+					itemVO.y = y;
+					itemVO.distance = distance;
 				}
 			} );
 
-			return point;
+			return itemVO;
 		}
 
-		public void MapListToObjectGrid(List<object> list)
+		public void MapListToObjectGrid(List<object> list, int size)
 		{
+			GameObject item = null;
+			List<ItemVO> itemVOs = new List<ItemVO>();
+
 			for( int i = 0; i < list.Count; ++i )
 			{
-			    GameObject item = (GameObject)list[ i ];
-			    Vector2 closetPoint = GetClosestPoint( item.transform.position );
+			    item = (GameObject)list[ i ];
+			    
+			    ItemVO itemVO = GetDistanceItemVO( item.transform.localPosition );
+			    itemVO.item = item;
 
-			    GameObject closestItem = (GameObject)objectGrid.Get( (int)closetPoint.x, (int)closetPoint.y );
-
-			    Object.Destroy( closestItem );
+			    itemVOs.Add( itemVO );
 			}
+
+
+			itemVOs = SortItemVOsByDistance( itemVOs );
+
+			for( int i = itemVOs.Count - 1; i >= 0; --i )
+			{
+			    ItemVO itemVO = itemVOs[ i ];
+			    // item = (GameObject)objectGrid.Get( itemVO.x, itemVO.y );
+
+			    if( i >= size )
+			    {
+			    	itemVOs.RemoveAt( i );
+			    	Object.Destroy( itemVO.item );
+			    }
+				else
+				{
+					objectGrid.Set( (int)itemVO.x, (int)itemVO.y, itemVO.item );
+				}
+			}
+		}
+
+		public List<ItemVO> SortItemVOsByDistance(List<ItemVO> list)
+		{
+			List<ItemVO> sortedList = list.OrderBy( o => o.distance ).ToList();
+
+			return sortedList;
 		}
 
 
@@ -104,8 +142,10 @@ namespace DavidOchmann.Grid
 		 */
 
 		/** Init ObjectGrid. */
-		private void initObjectGrid()
+		private void initGrids()
 		{
+			positionGrid = new ObjectGrid( (int)size.x, (int)size.y );
+
 			objectGrid = new ObjectGrid( (int)size.x, (int)size.y );
 			objectGrid.ForEveryElementCall( populateList );
 		}
@@ -113,7 +153,9 @@ namespace DavidOchmann.Grid
 		private void populateList(int x, int y, object value)
 		{
 			GameObject clone = GetCloneAtPosition( x, y );
+			
 			objectGrid.Set( x, y, clone );
+			positionGrid.Set( x, y, clone.transform.localPosition );
 
 			events.setup.Invoke( x, y, clone );
 		}
@@ -122,18 +164,10 @@ namespace DavidOchmann.Grid
 		/** Center grid on canvas. */
 		private void initPosition()
 		{
-			float x = -distance.x * ( size.x - 1 ) * .5f;
-			float y = distance.y * ( size.y - 1 ) * .5f;
+			float x = Mathf.Floor( -distance.x * ( size.x - 1 ) * .5f );
+			float y = Mathf.Floor( distance.y * ( size.y - 1 ) * .5f );
 
 			transform.localPosition = new Vector3( x, y, 0 );
-		}
-
-
-		/** Init PositionGrid. */
-		private void initPositionGrid()
-		{
-			positionGrid = new ObjectGrid( (int)size.x, (int)size.y );
-			positionGrid.Set( x, y, clone.transform.position );
 		}
 	}
 }

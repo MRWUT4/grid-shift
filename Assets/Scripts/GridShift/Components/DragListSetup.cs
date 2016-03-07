@@ -28,8 +28,6 @@ namespace GridShift
 
 		public void Setup(int x, int y, object value)
 		{
-			Debug.Log( "Setup " + x + " " + y);
-
 			GameObject item = (GameObject)value;
 			
 			setupItemValue( item );
@@ -77,6 +75,7 @@ namespace GridShift
 			InputMessenger inputMessenger = item.GetComponent<InputMessenger>();
  			inputMessenger.events.OnDrag.AddListener( itemOnDragHandler );
  			inputMessenger.events.OnDrop.AddListener( itemOnDropHandler );
+ 			inputMessenger.events.OnEndDrag.AddListener( itemOnDropHandler );
 		}
 
 		private void itemOnDragHandler(GameObject target, PointerEventData eventData)
@@ -104,14 +103,21 @@ namespace GridShift
 			vector2.x = Mathf.Round( vector2.x / dragList.distance.x ) * dragList.distance.x;
 			vector2.y = Mathf.Round( vector2.y / dragList.distance.y ) * dragList.distance.y;
 
+			dTween.Kill( true );
+
 			Tween dragListTween = dTween.Add( TweenFactory.DragListDisposition( dragList, vector2 ) );
 			dragListTween.OnComplete += tweenOnCompleteHandler;
 		}
 
 		private void tweenOnCompleteHandler(Tween tween)
 		{
-			gridDisplay.MapListToObjectGrid( dragList.list );
-			// mapDragListGameObjectsToGrid();
+			// active = false;
+			int size = dragList.orientation == Orientation.Horizontal ? (int)gridDisplay.size.x : (int)gridDisplay.size.y;
+
+			gridDisplay.MapListToObjectGrid( dragList.list, size );
+			
+			dragList = null;
+			// active = 
 		}
 
 
