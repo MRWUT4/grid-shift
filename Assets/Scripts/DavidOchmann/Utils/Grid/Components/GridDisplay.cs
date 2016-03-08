@@ -2,6 +2,8 @@
 using UnityEngine.Events;
 using System.Collections.Generic;
 using System.Linq;
+using DavidOchmann.Collections;
+using GridShift;
 
 namespace DavidOchmann.Grid
 {
@@ -37,15 +39,10 @@ namespace DavidOchmann.Grid
 		 * Getter / Setter.
 		 */
 		
-		// public float width
-		// {
-		// 	get { return size.x * distance.x; }
-		// }
-
-		// public float height
-		// {
-		// 	get { return size.y * distance.y; }
-		// }
+		public float width
+		{
+			get { return size.x * distance.x; }
+		}
 
 
 		/**
@@ -58,6 +55,8 @@ namespace DavidOchmann.Grid
 			initPosition();
 		}
 
+
+		/** Clone the template object and position it at cell position. */
 		public GameObject GetCloneAtPosition(int x, int y)
 		{
 			GameObject clone = Object.Instantiate( template );
@@ -71,6 +70,8 @@ namespace DavidOchmann.Grid
 			return clone;
 		}
 
+
+		/** Create ItemVO object with distance to nearest grid cell. */ 
 		private ItemVO GetDistanceItemVO(Vector3 aVector3)
 		{
 			float closestDistance = float.NaN;
@@ -94,6 +95,8 @@ namespace DavidOchmann.Grid
 			return itemVO;
 		}
 
+
+		/** Match list items to objectGrid positions. */
 		public void MapListToObjectGrid(List<object> list, int size)
 		{
 			GameObject item = null;
@@ -115,7 +118,6 @@ namespace DavidOchmann.Grid
 			for( int i = itemVOs.Count - 1; i >= 0; --i )
 			{
 			    ItemVO itemVO = itemVOs[ i ];
-			    // item = (GameObject)objectGrid.Get( itemVO.x, itemVO.y );
 
 			    if( i >= size )
 			    {
@@ -123,9 +125,7 @@ namespace DavidOchmann.Grid
 			    	Object.Destroy( itemVO.item );
 			    }
 				else
-				{
 					objectGrid.Set( (int)itemVO.x, (int)itemVO.y, itemVO.item );
-				}
 			}
 		}
 
@@ -134,6 +134,46 @@ namespace DavidOchmann.Grid
 			List<ItemVO> sortedList = list.OrderBy( o => o.distance ).ToList();
 
 			return sortedList;
+		}
+
+
+		/** Change alpha value of list items. */
+		public void ChangeListItemAlpha(List<object> list, Orientation orientation)
+		{
+			for( int i = 0; i < list.Count; ++i )
+			{
+			    GameObject item = (GameObject)list[ i ];
+			    ChangeItemAlpha( item, orientation );
+			}	
+		}
+
+		private void ChangeItemAlpha(GameObject item, Orientation orientation)
+		{
+			Unit unit = item.GetComponent<Unit>();	
+
+			// if( unit.value == 3 )
+			// {
+				Vector3 localPosition = item.transform.localPosition;
+				float alpha = 1;
+
+				CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
+
+				if( orientation == Orientation.Horizontal )
+				{
+					if( localPosition.x < 0 )
+						alpha = wrapAlpha( 1 - ( Mathf.Abs( localPosition.x ) / distance.x ) );
+					else
+					if( localPosition.x + distance.x > width )
+						alpha = wrapAlpha( -1 * ( ( localPosition.x - width ) / distance.x ) );
+				}
+				
+				canvasGroup.alpha = alpha;
+			// }
+		}
+
+		private float wrapAlpha(float value)
+		{
+			return Mathf.Max( 0, Mathf.Min( 1, value ) );
 		}
 
 

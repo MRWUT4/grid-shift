@@ -16,6 +16,7 @@ namespace DavidOchmann.Collections
 	{
 		public DragListUnityEvent wrapBeginning = new DragListUnityEvent();
 		public DragListUnityEvent wrapEnd = new DragListUnityEvent();
+		public DragListUnityEvent update = new DragListUnityEvent();
 	}
 
 
@@ -65,6 +66,7 @@ namespace DavidOchmann.Collections
 			{
 				updateListItemsDelta( disposition );
 				updateListWrapHandling( disposition );
+				updateEventDispatch();
 			}
 		}
 
@@ -112,6 +114,7 @@ namespace DavidOchmann.Collections
 			calulateDisposition( eventData );
 			setupPositionDictionary();
 
+			events.update.Invoke( this );
 			// updateListItemsDelta( disposition );
 			// updateListWrapHandling( disposition );
 		}
@@ -141,6 +144,8 @@ namespace DavidOchmann.Collections
 			}
 		}
 
+
+		/** Update delta value of list items. */
 		private void updateListItemsDelta(Vector2 disposition)
 		{
 			for( int i = 0; i < list.Count; ++i )
@@ -219,6 +224,13 @@ namespace DavidOchmann.Collections
 			list.Insert( insertIndex, removeItem );
 
 			return removeItem;
+		}
+
+
+		/** Dispatch event on every update. */
+		private void updateEventDispatch()
+		{
+			
 		}
 
 		/** OnDrop functions. */

@@ -144,6 +144,9 @@ namespace GridShift
 				dragList = new DragList( target, list, orientation, gridDisplay.distance );
 				dragList.events.wrapBeginning.AddListener( dragListWrapBeginningHandler );
 				dragList.events.wrapEnd.AddListener( dragListWrapEndHandler );
+				dragList.events.update.AddListener( dragListUpdateHandler );
+
+				gridDisplay.ChangeListItemAlpha( dragList.list, dragList.orientation );
 			}
 		}
 
@@ -161,6 +164,11 @@ namespace GridShift
 				copyUnityValues( dragList.list, 1, dragList.list.Count - 1 );
 			else
 				copyUnityValues( dragList.list, dragList.list.Count - 2, 0 );
+		}
+
+		private void dragListUpdateHandler(DragList dragList)
+		{
+			gridDisplay.ChangeListItemAlpha( dragList.list, dragList.orientation );
 		}
 
 		private void copyUnityValues(List<object> list, int aIndex, int bIndex)
