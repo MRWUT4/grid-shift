@@ -44,6 +44,11 @@ namespace DavidOchmann.Grid
 			get { return size.x * distance.x; }
 		}
 
+		public float height
+		{
+			get { return size.y * distance.y; }
+		}
+
 
 		/**
 		 * Public interface.
@@ -138,42 +143,56 @@ namespace DavidOchmann.Grid
 
 
 		/** Change alpha value of list items. */
-		public void ChangeListItemAlpha(List<object> list, Orientation orientation)
+		public void ChangeListAlpha(List<object> list, float alpha)
 		{
 			for( int i = 0; i < list.Count; ++i )
 			{
 			    GameObject item = (GameObject)list[ i ];
-			    ChangeItemAlpha( item, orientation );
+			    setItemAlpha( item, alpha );
 			}	
 		}
 
-		private void ChangeItemAlpha(GameObject item, Orientation orientation)
+		public void ChangeListPositionAlpha(List<object> list, Orientation orientation)
 		{
-			Unit unit = item.GetComponent<Unit>();	
-
-			// if( unit.value == 3 )
-			// {
-				Vector3 localPosition = item.transform.localPosition;
-				float alpha = 1;
-
-				CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
-
-				if( orientation == Orientation.Horizontal )
-				{
-					if( localPosition.x < 0 )
-						alpha = wrapAlpha( 1 - ( Mathf.Abs( localPosition.x ) / distance.x ) );
-					else
-					if( localPosition.x + distance.x > width )
-						alpha = wrapAlpha( -1 * ( ( localPosition.x - width ) / distance.x ) );
-				}
-				
-				canvasGroup.alpha = alpha;
-			// }
+			for( int i = 0; i < list.Count; ++i )
+			{
+			    GameObject item = (GameObject)list[ i ];
+			    ChangeItemPositionAlpha( item, orientation );
+			}	
 		}
 
-		private float wrapAlpha(float value)
+		private void ChangeItemPositionAlpha(GameObject item, Orientation orientation)
 		{
-			return Mathf.Max( 0, Mathf.Min( 1, value ) );
+			Vector3 localPosition = item.transform.localPosition;
+			float alpha = 1;
+
+			if( orientation == Orientation.Horizontal )
+			{
+				if( localPosition.x < 0 )
+					alpha = 1 - ( Mathf.Abs( localPosition.x ) / distance.x );
+				else
+				if( localPosition.x + distance.x > width )
+					alpha = -1 * ( ( localPosition.x - width ) / distance.x );
+			}
+			else
+			if( orientation == Orientation.Vertical )
+			{
+				if( localPosition.y - distance.y < -height )
+					alpha = ( localPosition.y + height ) / distance.y;
+				else
+				if( localPosition.y > 0 )
+					alpha = 1 - ( localPosition.y / distance.y );
+			}	
+
+			setItemAlpha( item, alpha );
+		}
+
+		private void setItemAlpha(GameObject item, float value)
+		{
+			float alpha = Mathf.Max( 0, Mathf.Min( 1, value ) );
+
+			CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
+			canvasGroup.alpha = alpha;
 		}
 
 

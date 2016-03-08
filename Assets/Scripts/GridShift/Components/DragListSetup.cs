@@ -34,7 +34,7 @@ namespace GridShift
 			setupItemInputMessenger( item );
 		}
 
-		public void Update()
+		public void FixedUpdate()
 		{
 			dTween.Update();
 			updateDragList();
@@ -114,6 +114,7 @@ namespace GridShift
 			// active = false;
 			int size = dragList.orientation == Orientation.Horizontal ? (int)gridDisplay.size.x : (int)gridDisplay.size.y;
 
+			gridDisplay.ChangeListAlpha( dragList.list, 1 );
 			gridDisplay.MapListToObjectGrid( dragList.list, size );
 			
 			dragList = null;
@@ -146,7 +147,7 @@ namespace GridShift
 				dragList.events.wrapEnd.AddListener( dragListWrapEndHandler );
 				dragList.events.update.AddListener( dragListUpdateHandler );
 
-				gridDisplay.ChangeListItemAlpha( dragList.list, dragList.orientation );
+				gridDisplay.ChangeListPositionAlpha( dragList.list, dragList.orientation );
 			}
 		}
 
@@ -168,7 +169,7 @@ namespace GridShift
 
 		private void dragListUpdateHandler(DragList dragList)
 		{
-			gridDisplay.ChangeListItemAlpha( dragList.list, dragList.orientation );
+			gridDisplay.ChangeListPositionAlpha( dragList.list, dragList.orientation );
 		}
 
 		private void copyUnityValues(List<object> list, int aIndex, int bIndex)
