@@ -103,10 +103,19 @@ namespace GridShift
 			vector2.x = Mathf.Round( vector2.x / dragList.distance.x ) * dragList.distance.x;
 			vector2.y = Mathf.Round( vector2.y / dragList.distance.y ) * dragList.distance.y;
 
+
+			// Debug.Log( vector2.x  + " " + dragList.distance.x  );
+
 			dTween.Kill( true );
 
 			Tween dragListTween = dTween.Add( TweenFactory.DragListDisposition( dragList, vector2 ) );
+			dragListTween.OnUpdate += tweenOnUpdateHandler;
 			dragListTween.OnComplete += tweenOnCompleteHandler;
+		}
+
+		private void tweenOnUpdateHandler(Tween tween)
+		{
+			gridDisplay.ChangeListPositionAlpha( dragList.list, dragList.orientation );
 		}
 
 		private void tweenOnCompleteHandler(Tween tween)
@@ -116,7 +125,8 @@ namespace GridShift
 
 			gridDisplay.ChangeListAlpha( dragList.list, 1 );
 			gridDisplay.MapListToObjectGrid( dragList.list, size );
-			
+
+			dragList.Update();
 			dragList = null;
 			// active = 
 		}

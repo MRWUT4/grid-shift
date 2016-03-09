@@ -64,8 +64,8 @@ namespace DavidOchmann.Collections
 		{
 			if( positions != null )
 			{
-				updateListItemsDelta( disposition );
 				updateListWrapHandling( disposition );
+				updateListItemsDelta( disposition );
 				updateEventDispatch();
 			}
 		}
@@ -113,8 +113,6 @@ namespace DavidOchmann.Collections
 		{
 			calulateDisposition( eventData );
 			setupPositionDictionary();
-
-			events.update.Invoke( this );
 			// updateListItemsDelta( disposition );
 			// updateListWrapHandling( disposition );
 		}
@@ -147,10 +145,11 @@ namespace DavidOchmann.Collections
 
 		/** Update delta value of list items. */
 		private void updateListItemsDelta(Vector2 disposition)
-		{
+		{	
 			for( int i = 0; i < list.Count; ++i )
 			{
 			    GameObject item = (GameObject)list[ i ];
+
 			    Vector3 localPosition = positions[ item ];
 
 			    localPosition.x += disposition.x;
@@ -210,7 +209,7 @@ namespace DavidOchmann.Collections
 				lastVector.x = firstVector.x - distance.x * add;
 			else
 				lastVector.y = firstVector.y - distance.y * add;
-
+			
 			positions[ lastItem ] = lastVector;
 
 			moveListItem( removeIndex, insertIndex );
@@ -230,7 +229,7 @@ namespace DavidOchmann.Collections
 		/** Dispatch event on every update. */
 		private void updateEventDispatch()
 		{
-			
+			events.update.Invoke( this );
 		}
 
 		/** OnDrop functions. */

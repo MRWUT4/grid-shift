@@ -69,7 +69,7 @@ namespace DavidOchmann.Grid
 			float posX = Mathf.Floor( (float)x * distance.x );
 			float posY = Mathf.Floor( -(float)y * distance.y );
 
-			clone.transform.SetParent( gameObject.transform );
+			clone.transform.SetParent( gameObject.transform, false );
 			clone.transform.localPosition = new Vector3( posX, posY, 0 );
 
 			return clone;
