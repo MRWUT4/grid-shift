@@ -21,17 +21,20 @@ namespace GridShift
 		 * Public interface.
 		 */
 
-		public void Start()
-		{
-			initVariables();
-		}
-
+		/** Gameplay interface. */
 		public void Setup(int x, int y, object value)
 		{
 			GameObject item = (GameObject)value;
 			
 			setupItemValue( item );
 			setupItemInputMessenger( item );
+		}
+
+
+		/** MonoBehaviour interface. */
+		public void Start()
+		{
+			initVariables();
 		}
 
 		public void FixedUpdate()
@@ -73,6 +76,7 @@ namespace GridShift
 		private void setupItemInputMessenger(GameObject item)
 		{
 			InputMessenger inputMessenger = item.GetComponent<InputMessenger>();
+
  			inputMessenger.events.OnDrag.AddListener( itemOnDragHandler );
  			inputMessenger.events.OnDrop.AddListener( itemOnDropHandler );
  			inputMessenger.events.OnEndDrag.AddListener( itemOnDropHandler );
@@ -85,58 +89,9 @@ namespace GridShift
 
 		private void itemOnDropHandler(GameObject target, PointerEventData eventData)
 		{
-			// TODO: Coninue with next state.
-
 			dragList.Kill();
 			animateDragListPositionToRoundValue();
-
-			// dragList.Reset();
-			// dragList = null;
 		}
-
-
-		/** Aniamtion functions. */
-		private void animateDragListPositionToRoundValue()
-		{
-			Vector2 vector2 = dragList.disposition;
-
-			vector2.x = Mathf.Round( vector2.x / dragList.distance.x ) * dragList.distance.x;
-			vector2.y = Mathf.Round( vector2.y / dragList.distance.y ) * dragList.distance.y;
-
-
-			// Debug.Log( vector2.x  + " " + dragList.distance.x  );
-
-			dTween.Kill( true );
-
-			Tween dragListTween = dTween.Add( TweenFactory.DragListDisposition( dragList, vector2 ) );
-			dragListTween.OnUpdate += tweenOnUpdateHandler;
-			dragListTween.OnComplete += tweenOnCompleteHandler;
-		}
-
-		private void tweenOnUpdateHandler(Tween tween)
-		{
-			gridDisplay.ChangeListPositionAlpha( dragList.list, dragList.orientation );
-		}
-
-		private void tweenOnCompleteHandler(Tween tween)
-		{
-			// active = false;
-			int size = dragList.orientation == Orientation.Horizontal ? (int)gridDisplay.size.x : (int)gridDisplay.size.y;
-
-			gridDisplay.ChangeListAlpha( dragList.list, 1 );
-			gridDisplay.MapListToObjectGrid( dragList.list, size );
-
-			dragList.Update();
-			dragList = null;
-			// active = 
-		}
-
-
-		/** Map list GameObjects to Grid .*/
-		// private void mapDragListGameObjectsToGrid()
-		// {
-			
-		// }
 
 
 		/** Setup DragList. */
@@ -182,6 +137,8 @@ namespace GridShift
 			gridDisplay.ChangeListPositionAlpha( dragList.list, dragList.orientation );
 		}
 
+
+		/** Unity copy / paste hanlding. */
 		private void copyUnityValues(List<object> list, int aIndex, int bIndex)
 		{
 			// List<object> list = dragList.list;
@@ -191,19 +148,6 @@ namespace GridShift
 
 			pasteElement.value = copyElement.value;	
 		}
-
-		// private void logDragListValues(DragList dragList)
-		// {
-		// 	List<object> list = dragList.list;
-
-		// 	for( int i = 0; i < list.Count; ++i )
-		// 	{
-		// 	    GameObject item = (GameObject)list[ i ];
-			    
-		// 	    Debug.Log( item.GetComponent<Unit>().value );
-		// 	}
-		// }
-
 
 		private List<object> getOrientationList(Point point, Orientation orientation, Vector2 delta)
 		{
@@ -238,6 +182,39 @@ namespace GridShift
 
 			int insert = position == 0 ? list.Count : 0;
 			list.Insert( insert, item );
+		}
+
+
+		/** Aniamtion functions. */
+		private void animateDragListPositionToRoundValue()
+		{
+			Vector2 vector2 = dragList.disposition;
+
+			vector2.x = Mathf.Round( vector2.x / dragList.distance.x ) * dragList.distance.x;
+			vector2.y = Mathf.Round( vector2.y / dragList.distance.y ) * dragList.distance.y;
+
+
+			dTween.Kill( true );
+
+			Tween dragListTween = dTween.Add( TweenFactory.DragListDisposition( dragList, vector2 ) );
+			dragListTween.OnUpdate += tweenOnUpdateHandler;
+			dragListTween.OnComplete += tweenOnCompleteHandler;
+		}
+
+		private void tweenOnUpdateHandler(Tween tween)
+		{
+			gridDisplay.ChangeListPositionAlpha( dragList.list, dragList.orientation );
+		}
+
+		private void tweenOnCompleteHandler(Tween tween)
+		{
+			int size = dragList.orientation == Orientation.Horizontal ? (int)gridDisplay.size.x : (int)gridDisplay.size.y;
+
+			gridDisplay.ChangeListAlpha( dragList.list, 1 );
+			gridDisplay.MapListToObjectGrid( dragList.list, size );
+
+			dragList.Update();
+			dragList = null;
 		}
 
 

@@ -26,9 +26,9 @@ namespace DavidOchmann.Grid
 
 	public class GridDisplay : MonoBehaviour
 	{
+		public GameObject template;
 		public Vector2 size = new Vector2( 3, 3 );		
 		public Vector2 distance = new Vector2( 100, 100 );		
-		public GameObject template;
 		public GridDisplayEvents events;
 
 		public ObjectGrid positionGrid;
