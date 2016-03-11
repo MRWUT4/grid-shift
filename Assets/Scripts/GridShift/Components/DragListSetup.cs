@@ -21,16 +21,6 @@ namespace GridShift
 		 * Public interface.
 		 */
 
-		/** Gameplay interface. */
-		public void Setup(int x, int y, object value)
-		{
-			GameObject item = (GameObject)value;
-			
-			setupItemValue( item );
-			setupItemInputMessenger( item );
-		}
-
-
 		/** MonoBehaviour interface. */
 		public void Start()
 		{
@@ -57,18 +47,41 @@ namespace GridShift
 		}
 
 
-		/** Setup functions. */
-		private void setupItemValue(GameObject item, int value = -1 )
+		/** Unit interface. */
+		public void Setup(int x, int y, object value)
+		{
+			GameObject item = (GameObject)value;
+			
+			setupItemValue( item );
+			setupItemInputMessenger( item );
+		}
+
+		public void triggerUnitDeactivation(GameObject target)
+		{
+			Animator animator = target.GetComponent<Animator>();
+			animator.Play( "transition" );
+
+			InputMessenger inputMessenger = target.GetComponent<InputMessenger>();
+			inputMessenger.enabled = false;
+		}
+
+		private void setupItemValue(GameObject item, Unit copyUnit = null )
 		{
 			Unit unit = item.GetComponent<Unit>();
 
-			if( value == -1 )
+			if( copyUnit == null )
 			{
 				unit.value = index + 1;
 				index++;
 			}
 			else
-				unit.value = value;
+			{
+				unit.value = copyUnit.value;
+				unit.active = copyUnit.active;
+
+				if( !unit.active )
+					unit.GetComponent<Animator>().Play( "disabled" );
+			}
 		}
 
 
@@ -84,13 +97,28 @@ namespace GridShift
 
 		private void itemOnDragHandler(GameObject target, PointerEventData eventData)
 		{
+			target.GetComponent<Unit>().active = false;
 			setupDragList( target, eventData );
 		}
 
 		private void itemOnDropHandler(GameObject target, PointerEventData eventData)
 		{
 			dragList.Kill();
+			disableAllInactiveUnits();
 			animateDragListPositionToRoundValue();
+		}
+
+
+		private void disableAllInactiveUnits()
+		{
+			objectGrid.ForEveryElementCall( delegate(int x, int y, object item)
+			{
+				GameObject gameObject = (GameObject)item;
+				Unit unit = gameObject.GetComponent<Unit>();
+
+				if( !unit.active )
+					triggerUnitDeactivation( gameObject );
+			});
 		}
 
 
@@ -146,7 +174,8 @@ namespace GridShift
 			Unit copyElement = ( (GameObject)list[ aIndex] ).GetComponent<Unit>();
 			Unit pasteElement = ( (GameObject)list[ bIndex ] ).GetComponent<Unit>();
 
-			pasteElement.value = copyElement.value;	
+			pasteElement.value = copyElement.value;
+			// setupItemValue( pasteElement.gameObject, copyElement );
 		}
 
 		private List<object> getOrientationList(Point point, Orientation orientation, Vector2 delta)
@@ -177,7 +206,7 @@ namespace GridShift
 			GameObject opposition = (GameObject)list[ value ];
 			Unit unit = opposition.GetComponent<Unit>();
 
-			setupItemValue( item, unit.value );
+			setupItemValue( item, unit );
 
 
 			int insert = position == 0 ? list.Count : 0;

@@ -1,13 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DavidOchmann.Events;
 
 namespace GridShift
 {
 	public class Unit : MonoBehaviour
 	{
-		public Text text;
+		public Text[] texts;
 		
 		private int _value;
+		private bool _active = true;
+		private CanvasGroup canvasGroup;
+		// private InputMessenger inputMessenger;
 
 
 		/**
@@ -25,16 +29,36 @@ namespace GridShift
 		    { 
 		        _value = value; 
 
-		        text.text = _value.ToString();
+		        for( int i = 0; i < texts.Length; ++i )
+		        {
+		            Text text = texts[ i ];
+		        	text.text = _value.ToString();
+		        }
 		    }
 		}	
 
 
+		public bool active
+		{
+			get 
+		    { 
+		        return _active; 
+		    }
+		
+		    set
+		    { 
+		        _active = value;
+	        	// inputMessenger.enabled = _active;
+		    }
+		}
+
+
 		/**
-		 * Public interface.
+		 * Public.
 		 */
 
-		public void Start()
+		/** MonoBahaviour implementation. */
+		public void Awake()
 		{
 			initVariables();
 		}
@@ -52,7 +76,7 @@ namespace GridShift
 		/** Init variables. */
 		private void initVariables()
 		{
-			
+			// inputMessenger = gameObject.GetComponent<InputMessenger>();
 		}
 	}
 }
