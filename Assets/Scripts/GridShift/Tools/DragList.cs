@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine;
+using UnityEngine.UI;
 using GridShift;
 
 namespace DavidOchmann.Collections
@@ -31,22 +32,37 @@ namespace DavidOchmann.Collections
 		public DragListEvents events = new DragListEvents();
 
 		private float wrapIndex;
+		private Canvas canvas;
 		private InputMessenger inputMessenger;
 
 
-		public DragList(GameObject target, List<object> list, Orientation orientation, Vector2 distance)
+		public DragList(GameObject target, List<object> list, Orientation orientation, Vector2 distance, Canvas canvas)
 		{
 			this.target = target;
 			this.list = list;
 			this.orientation = orientation;
 			this.distance = distance;
+			this.canvas = canvas;
 
 			init();
 		}
 
 
 		/**
-		 * Public interface.
+		 * Getter / Setter.
+		 */
+		
+		public float scaleFactor
+		{
+			get 
+		    { 
+		        return canvas.scaleFactor; 
+		    }
+		}
+
+
+		/**
+		 * Public.
 		 */
 
 		public void Reset()
@@ -123,9 +139,9 @@ namespace DavidOchmann.Collections
 			Vector2 position = eventData.position;
 
 			if( orientation == Orientation.Horizontal )
-				disposition.x = position.x - pressPosition.x;
+				disposition.x = ( position.x - pressPosition.x ) / scaleFactor;
 			else
-				disposition.y = position.y - pressPosition.y;
+				disposition.y = ( position.y - pressPosition.y ) / scaleFactor;
 		}
 
 		private void setupPositionDictionary()

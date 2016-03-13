@@ -77,10 +77,10 @@ namespace GridShift
 			else
 			{
 				unit.value = copyUnit.value;
-				unit.active = copyUnit.active;
+				// unit.active = copyUnit.active;
 
-				if( !unit.active )
-					unit.GetComponent<Animator>().Play( "disabled" );
+				// if( !unit.active )
+				// 	unit.GetComponent<Animator>().Play( "disabled" );
 			}
 		}
 
@@ -104,7 +104,7 @@ namespace GridShift
 		private void itemOnDropHandler(GameObject target, PointerEventData eventData)
 		{
 			dragList.Kill();
-			disableAllInactiveUnits();
+			// disableAllInactiveUnits();
 			animateDragListPositionToRoundValue();
 		}
 
@@ -134,8 +134,9 @@ namespace GridShift
 				
 				List<object> list = getOrientationList( point, orientation, delta );
 
+				Canvas canvas = GetComponentInParent<Canvas>();
 
-				dragList = new DragList( target, list, orientation, gridDisplay.distance );
+				dragList = new DragList( target, list, orientation, gridDisplay.distance, canvas );
 				dragList.events.wrapBeginning.AddListener( dragListWrapBeginningHandler );
 				dragList.events.wrapEnd.AddListener( dragListWrapEndHandler );
 				dragList.events.update.AddListener( dragListUpdateHandler );
