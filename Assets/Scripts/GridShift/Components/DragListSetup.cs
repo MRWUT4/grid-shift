@@ -97,7 +97,7 @@ namespace GridShift
 
 		private void itemOnDragHandler(GameObject target, PointerEventData eventData)
 		{
-			target.GetComponent<Unit>().active = false;
+			// target.GetComponent<Unit>().active = false;
 			setupDragList( target, eventData );
 		}
 
@@ -109,17 +109,17 @@ namespace GridShift
 		}
 
 
-		private void disableAllInactiveUnits()
-		{
-			objectGrid.ForEveryElementCall( delegate(int x, int y, object item)
-			{
-				GameObject gameObject = (GameObject)item;
-				Unit unit = gameObject.GetComponent<Unit>();
+		// private void disableAllInactiveUnits()
+		// {
+		// 	objectGrid.ForEveryElementCall( delegate(int x, int y, object item)
+		// 	{
+		// 		GameObject gameObject = (GameObject)item;
+		// 		Unit unit = gameObject.GetComponent<Unit>();
 
-				if( !unit.active )
-					triggerUnitDeactivation( gameObject );
-			});
-		}
+		// 		if( !unit.active )
+		// 			triggerUnitDeactivation( gameObject );
+		// 	});
+		// }
 
 
 		/** Setup DragList. */
